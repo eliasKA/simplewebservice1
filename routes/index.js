@@ -12,7 +12,27 @@ router.get('/', function(req, res) {
   logRequest(req, res, timestamp);
 });
 
-// invert colors of an image
+// clear log files
+router.get('/clearlog', function(req, res) {
+  fs.writeFile('webaccess_log', "", function (err) {
+    if(err){
+      debug("failed to clear log" + line);
+    }else{
+      debug("log succesfully cleared");
+    }
+    res.end("Log cleared");
+    return;
+  });
+});
+
+// clear log files
+router.get('/getlog', function(req, res) {
+  var timestamp = new Date();
+  res.download('webaccess_log');
+  logRequest(req, res, timestamp);
+});
+
+// invert effect on image
 router.post('/b', function(req, res) {
   var timestamp = new Date();
   var image = req.body;
@@ -36,7 +56,7 @@ router.post('/b', function(req, res) {
   logRequest(req, res, timestamp);
 });
 
-// greyscale efffect on image
+// greyscale effect on image
 router.post('/a', function(req, res) {
   var timestamp = new Date();
   var image = req.body;

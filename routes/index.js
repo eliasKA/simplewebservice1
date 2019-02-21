@@ -1,23 +1,26 @@
 var express = require('express');
 var debug = require('debug')('simplewebservice:server');
 var Jimp = require('jimp');
+var exhaustion = require('../methods/ExhaustResources.js');
+var axios = require('axios');
+
 const fs = require('fs');
 const date = require('date-and-time');
 const router = express.Router();
 
 // returns an image
-router.get('/', function(req, res) {
+router.get('/', function (req, res) {
   var timestamp = new Date();
   res.download('routes/smiley.png');
   logRequest(req, res, timestamp);
 });
 
 // clear log files
-router.get('/clearlog', function(req, res) {
+router.get('/clearlog', function (req, res) {
   fs.writeFile('webaccess_log', "", function (err) {
-    if(err){
+    if (err) {
       debug("failed to clear log" + line);
-    }else{
+    } else {
       debug("log succesfully cleared");
     }
     res.end("Log cleared");
@@ -26,30 +29,30 @@ router.get('/clearlog', function(req, res) {
 });
 
 // clear log files
-router.get('/getlog', function(req, res) {
+router.get('/getlog', function (req, res) {
   var timestamp = new Date();
   res.download('webaccess_log');
   logRequest(req, res, timestamp);
 });
 
 // invert effect on image
-router.post('/b', function(req, res) {
+router.post('/b', function (req, res) {
   var timestamp = new Date();
   var image = req.body;
 
-  try{
+  try {
     Jimp.read(image, (err, input) => {
       if (err) throw err;
       input.invert();
 
       input.getBuffer(Jimp.AUTO, (err, output) => {
-        if(err) throw err;
+        if (err) throw err;
 
-        res.writeHead(200, {'Content-Type': 'image/png' });
+        res.writeHead(200, {'Content-Type': 'image/png'});
         res.end(output, 'binary');
       });
     });
-  }catch (err){
+  } catch (err) {
     res.status(400).send(`Error: ${err.message}`).end();
   }
 
@@ -57,27 +60,131 @@ router.post('/b', function(req, res) {
 });
 
 // greyscale effect on image
-router.post('/a', function(req, res) {
+router.post('/a', function (req, res) {
   var timestamp = new Date();
   var image = req.body;
 
-  try{
-      Jimp.read(image, (err, input) => {
+  try {
+    Jimp.read(image, (err, input) => {
+      if (err) throw err;
+      input.greyscale();
+
+      input.getBuffer(Jimp.AUTO, (err, output) => {
         if (err) throw err;
-        input.greyscale();
 
-        input.getBuffer(Jimp.AUTO, (err, output) => {
-          if(err) throw err;
-
-          res.writeHead(200, {'Content-Type': 'image/png' });
-          res.end(output, 'binary');
-        });
+        res.writeHead(200, {'Content-Type': 'image/png'});
+        res.end(output, 'binary');
       });
-  }catch (err){
+    });
+  } catch (err) {
     res.status(400).send(`Error: ${err.message}`).end();
   }
 
   logRequest(req, res, timestamp);
+});
+
+router.post('/exhaustCPU', (req, res) => {
+  exhaustion.exhaustCPU();
+
+  var timestamp = new Date();
+  var image = req.body;
+
+  try {
+    Jimp.read(image, (err, input) => {
+      if (err) throw err;
+      input.greyscale();
+
+      input.getBuffer(Jimp.AUTO, (err, output) => {
+        if (err) throw err;
+
+        res.writeHead(200, {'Content-Type': 'image/png'});
+        res.end(output, 'binary');
+      });
+    });
+  } catch (err) {
+    res.status(400).send(`Error: ${err.message}`).end();
+  }
+
+  logRequest(req, res, timestamp);
+});
+
+router.post('/exhaustMEM', (req, res) => {
+  exhaustion.exhaustMEM();
+
+  var timestamp = new Date();
+  var image = req.body;
+
+  try {
+    Jimp.read(image, (err, input) => {
+      if (err) throw err;
+      input.blur(10);
+
+      input.getBuffer(Jimp.AUTO, (err, output) => {
+        if (err) throw err;
+
+        res.writeHead(200, {'Content-Type': 'image/png'});
+        res.end(output, 'binary');
+      });
+    });
+  } catch (err) {
+    res.status(400).send(`Error: ${err.message}`).end();
+  }
+
+  logRequest(req, res, timestamp);
+});
+
+router.post('/exhaustNETIN', (req, res) => {
+  exhaustion.exhaustNETIN().then(() => {
+    var timestamp = new Date();
+    var image = req.body;
+
+    try {
+      Jimp.read(image, (err, input) => {
+        if (err) throw err;
+        input.blur(10);
+
+        input.getBuffer(Jimp.AUTO, (err, output) => {
+          if (err) throw err;
+
+          res.writeHead(200, {'Content-Type': 'image/png'});
+          res.end(output, 'binary');
+        });
+      });
+    } catch (err) {
+      res.status(400).send(`Error: ${err.message}`).end();
+    }
+
+    logRequest(req, res, timestamp);
+  }).catch(err => {
+    res.status(400).send(`Error: ${err.message}`).end();
+  });
+});
+
+router.post('/exhaustNETOUT', (req, res) => {
+  exhaustion.exhaustNETOUT().then(() => {
+    var timestamp = new Date();
+    var image = req.body;
+
+    try {
+      Jimp.read(image, (err, input) => {
+        if (err) throw err;
+        input.blur(10);
+
+        input.getBuffer(Jimp.AUTO, (err, output) => {
+          if (err) throw err;
+
+          res.writeHead(200, {'Content-Type': 'image/png'});
+          res.end(output, 'binary');
+        });
+      });
+    } catch (err) {
+      res.status(400).send(`Error: ${err.message}`).end();
+    }
+
+    logRequest(req, res, timestamp);
+  }).catch(err => {
+    res.status(400).send(`Error: ${err.message}`).end();
+  });
 });
 
 logRequest = function (req, res, now) {
@@ -95,10 +202,10 @@ logRequest = function (req, res, now) {
     + " 1000" //needs to be changed once known what is needed to be here
   debug(line);
   fs.appendFile('webaccess_log', line + "\r\n", function (err, data) {
-      if(err){
-        debug("failed to write log-event" + line);
-      }
-      return;
+    if (err) {
+      debug("failed to write log-event" + line);
+    }
+    return;
   });
 }
 

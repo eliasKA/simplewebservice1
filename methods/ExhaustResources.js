@@ -2,29 +2,22 @@ var fs = require('fs');
 var axios = require('axios');
 var FormData = require('form-data');
 var rp = require('request-promise');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+
+async function ls() {
+  const { stdout, stderr } = await exec('ls');
+  console.log('stdout:', stdout);
+  console.log('stderr:', stderr);
+}
+ls();
 
 module.exports.exhaustCPU = () => {
-  var max = 5000000000;
-  for (var i = 0; i < max; i++) {
-    //do nothing
-  };
+  return exec('stress-ng --cpu 0 --cpu-method ackermann -t 15s');
 }
 
 module.exports.exhaustMEM = (x) => {
-  function recursiveMethod(i) {
-    var x = 'test';
-    var y = 'test';
-    var z = 'test';
-
-    var max = 8000;
-    if (i >= max) {
-      return max;
-    } else {
-      return recursiveMethod(i+1);
-    }
-  }
-
-  recursiveMethod(0);
+  return exec('stress-ng --vm 6 --vm-method ror -t 15s');
 };
 
 module.exports.exhaustNETIN = () => {

@@ -1,6 +1,6 @@
 FROM node:9
 
-RUN apt-get update && apt-get install stress
+RUN apt-get update && apt-get install stress-ng
 
 WORKDIR /usr/src/app
 

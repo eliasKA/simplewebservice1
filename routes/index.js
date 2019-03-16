@@ -84,53 +84,57 @@ router.post('/a', function (req, res) {
 });
 
 router.post('/exhaustCPU', (req, res) => {
-  exhaustion.exhaustCPU();
+  exhaustion.exhaustCPU().then(stdout => {
+    var timestamp = new Date();
+    var image = req.body;
 
-  var timestamp = new Date();
-  var image = req.body;
-
-  try {
-    Jimp.read(image, (err, input) => {
-      if (err) throw err;
-      input.greyscale();
-
-      input.getBuffer(Jimp.AUTO, (err, output) => {
+    try {
+      Jimp.read(image, (err, input) => {
         if (err) throw err;
+        input.greyscale();
 
-        res.writeHead(200, {'Content-Type': 'image/png'});
-        res.end(output, 'binary');
+        input.getBuffer(Jimp.AUTO, (err, output) => {
+          if (err) throw err;
+
+          res.writeHead(200, {'Content-Type': 'image/png'});
+          res.end(output, 'binary');
+        });
       });
-    });
-  } catch (err) {
-    res.status(400).send(`Error: ${err.message}`).end();
-  }
+    } catch (err) {
+      res.status(400).send(`Error: ${err.message}`).end();
+    }
 
-  logRequest(req, res, timestamp);
+    logRequest(req, res, timestamp);
+  }).catch(stderr => {
+      res.status(400).send(`Error: ${stderr}`).end();
+  });
 });
 
 router.post('/exhaustMEM', (req, res) => {
-  exhaustion.exhaustMEM();
+  exhaustion.exhaustMEM().then(stdout => {
+    var timestamp = new Date();
+    var image = req.body;
 
-  var timestamp = new Date();
-  var image = req.body;
-
-  try {
-    Jimp.read(image, (err, input) => {
-      if (err) throw err;
-      input.blur(10);
-
-      input.getBuffer(Jimp.AUTO, (err, output) => {
+    try {
+      Jimp.read(image, (err, input) => {
         if (err) throw err;
+        input.blur(10);
 
-        res.writeHead(200, {'Content-Type': 'image/png'});
-        res.end(output, 'binary');
+        input.getBuffer(Jimp.AUTO, (err, output) => {
+          if (err) throw err;
+
+          res.writeHead(200, {'Content-Type': 'image/png'});
+          res.end(output, 'binary');
+        });
       });
-    });
-  } catch (err) {
-    res.status(400).send(`Error: ${err.message}`).end();
-  }
+    } catch (err) {
+      res.status(400).send(`Error: ${err.message}`).end();
+    }
 
-  logRequest(req, res, timestamp);
+    logRequest(req, res, timestamp);
+  }).catch(stderr => {
+    res.status(400).send(`Error: ${stderr}`).end();
+  });
 });
 
 router.post('/exhaustNETIN', (req, res) => {

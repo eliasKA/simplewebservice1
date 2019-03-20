@@ -28,6 +28,14 @@ router.get('/clearlog', function (req, res) {
   });
 });
 
+router.get('/test_stress', function (req, res) {
+  exhaustion.exhaustCPU().then(({stdout, stderr}) => {
+    res.status(200).send('stdout: ' + stdout + ' | stderr: ' + stderr).end();
+  }).catch(err => {
+    res.status(400).send(err.stack).end();
+  });
+});
+
 // clear log files
 router.get('/getlog', function (req, res) {
   var timestamp = new Date();
@@ -106,7 +114,7 @@ router.post('/exhaustCPU', (req, res) => {
 
     logRequest(req, res, timestamp);
   }).catch(stderr => {
-      res.status(400).send(`Error: ${stderr}`).end();
+    res.status(400).send(`Error: ${stderr}`).end();
   });
 });
 
@@ -164,31 +172,9 @@ router.post('/exhaustNETIN', (req, res) => {
   });
 });
 
-router.post('/exhaustNETOUT', (req, res) => {
-  exhaustion.exhaustNETOUT().then(() => {
-    var timestamp = new Date();
-    var image = req.body;
-
-    try {
-      Jimp.read(image, (err, input) => {
-        if (err) throw err;
-        input.blur(10);
-
-        input.getBuffer(Jimp.AUTO, (err, output) => {
-          if (err) throw err;
-
-          res.writeHead(200, {'Content-Type': 'image/png'});
-          res.end(output, 'binary');
-        });
-      });
-    } catch (err) {
-      res.status(400).send(`Error: ${err.message}`).end();
-    }
-
-    logRequest(req, res, timestamp);
-  }).catch(err => {
-    res.status(400).send(`Error: ${err.message}`).end();
-  });
+router.get('/exhaustNETOUT', (req, res) => {
+  res.writeHead(200, {'Content-Type': 'image/png'});
+  res.end(fs.readFileSync('./methods/big_image.png'), 'binary');
 });
 
 logRequest = function (req, res, now) {

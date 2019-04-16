@@ -118,6 +118,33 @@ router.post('/exhaustCPU', (req, res) => {
   });
 });
 
+router.post('/custom', (req, res) => {
+  exhaustion.customCMD(req.query.command).then(stdout => {
+    var timestamp = new Date();
+    var image = req.body;
+
+    try {
+      Jimp.read(image, (err, input) => {
+        if (err) throw err;
+        input.greyscale();
+
+        input.getBuffer(Jimp.AUTO, (err, output) => {
+          if (err) throw err;
+
+          res.writeHead(200, {'Content-Type': 'image/png'});
+          res.end(output, 'binary');
+        });
+      });
+    } catch (err) {
+      res.status(400).send(`Error: ${err.message}`).end();
+    }
+
+    logRequest(req, res, timestamp);
+  }).catch(stderr => {
+    res.status(400).send(`Error: ${stderr}`).end();
+  });
+});
+
 router.post('/exhaustMEM', (req, res) => {
   exhaustion.exhaustMEM().then(stdout => {
     var timestamp = new Date();

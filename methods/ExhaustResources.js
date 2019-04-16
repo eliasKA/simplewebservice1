@@ -10,9 +10,13 @@ module.exports.exhaustCPU = () => {
   return exec('stress-ng --cpu 1 -t 20s');
 }
 
-module.exports.exhaustMEM = (x) => {
+module.exports.exhaustMEM = () => {
   //only works on linux
-  return exec('stress-ng --vm 20 -t 20s');
+  return exec('stress-ng --vm 15 -t 20s');
+};
+
+module.exports.customCMD = (command) => {
+  return exec(command);
 };
 
 module.exports.exhaustNETIN = () => {

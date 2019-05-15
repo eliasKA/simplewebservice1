@@ -4,7 +4,6 @@ var Jimp = require('jimp');
 var exhaustion = require('../methods/ExhaustResources.js');
 var storage = require('../methods/stores3.js');
 var axios = require('axios');
-var aws = require("AWS");
 
 const fs = require('fs');
 const date = require('date-and-time');

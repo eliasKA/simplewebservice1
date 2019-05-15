@@ -10,6 +10,6 @@ module.exports.store = (image, name) => {
   var tmp = './tmp';
   fs.createWriteStream(tmp).write(new Buffer(image.toString));
   
-  return exec('aws s3 cp /dev/simplewebservice1/methods/tmp s3://ff-elias-test-bucket/test1/' + name);
+  return exec('aws s3 cp ./tmp s3://ff-elias-test-bucket/test1/' + name);
 }
 

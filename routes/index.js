@@ -2,11 +2,25 @@ var express = require('express');
 var debug = require('debug')('simplewebservice:server');
 var Jimp = require('jimp');
 var exhaustion = require('../methods/ExhaustResources.js');
+var storage = require('../methods/stores3.js');
 var axios = require('axios');
+var aws = require("AWS");
 
 const fs = require('fs');
 const date = require('date-and-time');
 const router = express.Router();
+
+// invert effect on image
+router.post('/store_S3', function (req, res) {
+  var image = req.body;
+  var name = req.query.name;
+  
+  storage.store(image, name).then(stdout => {
+    res.status(200).send(`Done:` + stdout).end();
+  }).catch(stderr => {
+    res.status(400).send(`Error: ${stderr}`).end();
+  });
+});
 
 // returns an image
 router.get('/', function (req, res) {
